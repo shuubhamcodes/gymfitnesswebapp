@@ -1,14 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
-
-
+import { exerciseOptions,fetchData } from '../utils/fetchData';
+import HorizontalScrollbar from './HorizontalScrollbar';
     const SearchExercises =()=>{
            const  [search, setSearch]= useState('');
+           const [exercises,setExercises] = useState([]);
+           const [bodyParts, setBodyParts] = useState([]);
+           useEffect(() => {
+            const fetchExercisesData = async () => {
+              const bodyPartsData = await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPartList', exerciseOptions);
+              console.log(bodyPartsData);
+              setBodyParts(['all', ...bodyPartsData]);
+            };
+        
+            fetchExercisesData();
+          }, []);
+
+
+
            const handleSearch = async()=>{
                if (search){
-                // const exercisesData = await fetchData();
-                
+                const exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPartList',exerciseOptions);
+                console.log(exercisesData);
+                const searchedExercises = exercisesData.filter(
+                    (item) => item.name.toLowerCase().includes(search)
+                           || item.target.toLowerCase().includes(search)
+                           || item.equipment.toLowerCase().includes(search)
+                           || item.bodyPart.toLowerCase().includes(search),
+                  );
+                setSearch('');
+                setExercises(searchedExercises);
                }
            }
     
@@ -27,7 +49,7 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material';
     }
     }}
     height ="76px"
-    value ="{search}"
+    value ={search}
     onChange={(e) => setSearch(e.target.value.toLowerCase())}
     placeholder="Search Exercises"
     type="text"
@@ -36,7 +58,9 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material';
     Search
     </Button>
    </Box>
-
+   <Box sx={{ position: 'relative', width: '100%', p: '20px' }}>
+        <HorizontalScrollbar data={bodyParts} />
+      </Box>
         </Stack>
   )
     }
